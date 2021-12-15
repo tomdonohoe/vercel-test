@@ -3,6 +3,11 @@ import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+import RoastPhoto from './components/RoastPhoto';
+
+import { Categories, HappyCategories, FearCategories, PhotoDetails } from './types';
+import { getPhotosByCategory, getPhotosByCategoryAndSubCategory, getRandomPhoto } from './helpers/photos.helpers';
+
 interface ApiRes {
   name: string;
   description: string;
@@ -41,12 +46,16 @@ interface PexelsRes {
 const COUPLE_FIGHTING_ID = 984949;
 
 function App() {
+  // warmup api
+  fetch('/api/status');
+
   const [data, setData] = useState<ApiRes | undefined>();
   const [photo, setPhoto] = useState<PexelsRes | undefined>();
+  const [alreadyUsedIds, setAlreadyUsedIds] = useState<PhotoDetails[] | undefined>(undefined);
   
   useEffect(() => {
     getData();
-    getPhoto();
+    // getPhoto();
   }, []);
 
   const getData = async () => {
@@ -61,21 +70,39 @@ function App() {
     }
   }
 
-  const getPhoto = async () => {
-    try {
-      const res = await fetch(`/api/pexels/photos?photoId=${COUPLE_FIGHTING_ID}`);
-      if (res) {
-        const data: PhotosResponse = await res.json();
-        if (data.success) {
-          setPhoto(data.data);
-        }
-      };
-    } catch (err) {
-      const errorResponse = err as Response;
-      const error = await errorResponse.json();
-      console.log(error);
+  const updateAlreadyUsedIds = (photo: PhotoDetails) => {
+    if (alreadyUsedIds) {
+      setAlreadyUsedIds([...alreadyUsedIds, photo]);
+    } else {
+      setAlreadyUsedIds([photo]);
     }
   }
+  // const getPhoto = async () => {
+  //   try {
+  //     const res = await fetch(`/api/pexels/photos?photoId=${COUPLE_FIGHTING_ID}`);
+  //     if (res) {
+  //       const data: PhotosResponse = await res.json();
+  //       if (data.success) {
+  //         setPhoto(data.data);
+  //       }
+  //     };
+  //   } catch (err) {
+  //     const errorResponse = err as Response;
+  //     const error = await errorResponse.json();
+  //     console.log(error);
+  //   }
+  // }
+
+  // const photos = getPhotosByCategory(Categories.HAPPY);
+
+  // console.log(photos);
+
+  // const weddingPhotos = getPhotosByCategoryAndSubCategory(Categories.HAPPY, HappyCategories.WEDDING);
+  // console.log(weddingPhotos);
+
+  // const randomWeddingPhoto = getRandomPhoto(weddingPhotos);
+  // console.log(randomWeddingPhoto);
+
 
   return (
     <div className="App">
@@ -99,9 +126,13 @@ function App() {
         >
           Learn React
         </a>
-        { photo && photo.src && (
-          <img src={photo.src.landscape} alt={photo.alt} />
-        )}
+
+        <RoastPhoto 
+          category={Categories.HAPPY}
+          alreadyUsedIds={alreadyUsedIds}
+          setAlreadyUsedIds={updateAlreadyUsedIds}
+        />
+
       </header>
     </div>
   );

@@ -1,7 +1,6 @@
-import { createClient, ErrorResponse } from 'pexels';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const client = createClient(process.env.PEXELS_API_KEY);
+import { findPhotoById } from './client';
 
 export default async (request: VercelRequest, response: VercelResponse) => {
     if (request.query && !request.query.photoId) {
@@ -14,7 +13,7 @@ export default async (request: VercelRequest, response: VercelResponse) => {
     const photoId = Number(request.query.photoId);
 
     try {
-        const photo = await client.photos.show({ id: photoId });
+        const photo = await findPhotoById(photoId);
         response.status(200).send({
             success: true,
             data: {
