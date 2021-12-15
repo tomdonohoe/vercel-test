@@ -1,4 +1,4 @@
-import { createClient } from 'pexels';
+import { createClient, ErrorResponse } from 'pexels';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const client = createClient(process.env.PEXELS_API_KEY);
@@ -11,8 +11,10 @@ export default async (request: VercelRequest, response: VercelResponse) => {
         });
     }
 
+    const photoId = Number(request.query.photoId);
+
     try {
-        const photo = await client.photos.show({ id: request.query.photoId as string });
+        const photo = await client.photos.show({ id: photoId });
         response.status(200).send({
             success: true,
             data: {
@@ -20,9 +22,10 @@ export default async (request: VercelRequest, response: VercelResponse) => {
             },
         });
     } catch (err) {
+        const e = await err.json();
         response.status(500).send({
             success: false,
-            errorMessage: err,
+            errorMessage: e,
         });
     }
 };

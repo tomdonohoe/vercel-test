@@ -8,6 +8,11 @@ interface ApiRes {
   description: string;
 }
 
+interface PhotosResponse {
+  data: PexelsRes;
+  success: boolean;
+}
+
 interface PexelsResSrc {
   original: string;
   large2x: string;
@@ -24,6 +29,7 @@ interface PexelsRes {
     width: number;
     height: number;
     url: string;
+    alt: string;
     photographer: string;
     photographer_url: string;
     photographer_id: number;
@@ -41,29 +47,33 @@ function App() {
   useEffect(() => {
     getData();
     getPhoto();
-  });
+  }, []);
 
   const getData = async () => {
     try {
       const res = await fetch('/api/test/index?name=tom');
       if (res) {
         const data = await res.json();
-        setData(data);
+        setData(data.data);
       };
     } catch (err) {
       console.log(err);
     }
   }
 
-  const getPhoto= async () => {
+  const getPhoto = async () => {
     try {
       const res = await fetch(`/api/pexels/photos?photoId=${COUPLE_FIGHTING_ID}`);
       if (res) {
-        const data: PexelsRes = await res.json();
-        setPhoto(data);
+        const data: PhotosResponse = await res.json();
+        if (data.success) {
+          setPhoto(data.data);
+        }
       };
     } catch (err) {
-      console.log(err);
+      const errorResponse = err as Response;
+      const error = await errorResponse.json();
+      console.log(error);
     }
   }
 
@@ -89,7 +99,9 @@ function App() {
         >
           Learn React
         </a>
-        <img src={photo?.src.landscape} />
+        { photo && photo.src && (
+          <img src={photo.src.landscape} alt={photo.alt} />
+        )}
       </header>
     </div>
   );
