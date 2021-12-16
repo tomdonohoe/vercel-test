@@ -60,7 +60,7 @@ const RoastPhoto: FunctionComponent<RoastPhotoProps> = ({
           <img src={photo.src.landscape} alt={photo.alt} />
         )}
         <div className="roast-photo__meta">
-            <span>Powered by Pexels. </span>
+            <span>Powered by Pexels.</span>
             <span>Photo by <a href={photo?.photographer_url}>{photo?.photographer}</a></span>
         </div>
         </div>

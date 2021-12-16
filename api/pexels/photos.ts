@@ -21,10 +21,10 @@ export default async (request: VercelRequest, response: VercelResponse) => {
             },
         });
     } catch (err) {
-        const e = await err.json();
+        const error = await err.json();
         response.status(500).send({
             success: false,
-            errorMessage: e,
+            errorMessage: error,
         });
     }
 };
