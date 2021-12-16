@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 import { findPhotoById } from './client';
-import { ApiResponse } from './types';
+import { ApiResponse } from '../types';
 
 export default async (request: VercelRequest, response: VercelResponse) => {
     if (request.query && !request.query.photoId) {
