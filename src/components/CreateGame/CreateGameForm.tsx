@@ -1,15 +1,19 @@
 import { FunctionComponent, useState } from "react";
 
-import { generateName } from '../helpers/util/generateName.helpers';
+import { generateName } from '../../helpers/util/generateName.helpers';
 
 interface CreateGameFormProps {
     updateFriendlyName: (name: string) => void;
     updateGameId: (gameId: string) => void;
+    hostGame: (gameId: string, friendlyName: string) => void;
+    joinGame: (gameId: string, friendlyName: string) => void;
 }
 
 const CreateGameForm: FunctionComponent<CreateGameFormProps> = ({
     updateFriendlyName,
     updateGameId,
+    hostGame,
+    joinGame,
 }) => {
     const [friendlyName, setFriendlyName] = useState<string>(generateName(2));
     const urlParams = new URLSearchParams(window.location.search);
@@ -28,13 +32,17 @@ const CreateGameForm: FunctionComponent<CreateGameFormProps> = ({
     }
 
     const handleCreateGame = () => {
-        updateFriendlyName(friendlyName);
         const gameId = getOrCreateGameId();
+        updateFriendlyName(friendlyName);
         updateGameId(gameId);
+        hostGame(gameId, friendlyName);
     }
 
     const handleJoinGame = () => {
+        const gameId = getOrCreateGameId();
         updateFriendlyName(friendlyName);
+        updateGameId(gameId);
+        joinGame(gameId, friendlyName);
     }
 
     return (

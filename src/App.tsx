@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import CreateGameForm from './components/CreateGameForm';
+import CreateGameForm from './components/CreateGame/CreateGameForm';
+import InviteLink from './components/CreateGame/InviteLink';
 import RoastPhoto from './components/RoastPhoto';
 
 import { Categories, PhotoDetails } from './types';
@@ -22,6 +23,11 @@ interface ApiRes {
   description: string;
 }
 
+export enum ClientType {
+  HOST,
+  GUEST
+}
+
 function App() {
   // warmup api
   fetch('/api/status');
@@ -36,23 +42,6 @@ function App() {
     getData();
     // getPhoto();
   }, []);
-
-  useEffect(() => {
-    hostGame();
-  }, [gameId]);
-
-  useEffect(() => {
-    joinGame();
-  }, [friendlyName]);
-
-  useEffect(() => {
-    connectServer();
-  }, [p2pServer]);
-
-  useEffect(() => {
-    connectClient();
-  }, [p2pClient]);
-
 
   const getData = async () => {
     try {
@@ -74,90 +63,38 @@ function App() {
     }
   }
 
-  const hostGame = async () => {
-    if (gameId === null) {
-      return;
-    }
-
+  const hostGame = async (gameId: string, friendlyName: string) => {
     const pubSubClient = new PubSubClient((message: any, metadata: any) => {
       handleMessagefromAbly(message, metadata, p2pClient, p2pServer);
     });
 
-    console.log(pubSubClient);
-
     const identity = new Identity(friendlyName);
-
-    console.log(identity);
-
-    console.log(gameId);
 
     const server = new P2PServer(identity, gameId, pubSubClient);
     const client = new P2PClient(identity, gameId, pubSubClient);
+
+    server.connect();
+    client.connect();
 
     setP2pServer(server);
     setP2pClient(client);
   }
 
-  const connectServer = async () => {
-    if (p2pServer === null) {
-      return;
-    }
-
-    await p2pServer.connect();
-  }
-
-  const connectClient = async () => {
-    if (p2pClient === null) {
-      return;
-    }
-    await p2pClient.connect();
-  }
-
-  const joinGame = async () => {
-    if (friendlyName === null) {
-      return;
-    }
+  const joinGame = async (gameId: string, friendlyName: string) => {
     const pubSubClient = new PubSubClient((message: any, metadata: any) => {
       handleMessagefromAbly(message, metadata, p2pClient, p2pServer);
     });
 
     const identity = new Identity(friendlyName);
-    setP2pClient(new P2PClient(identity, gameId, pubSubClient));
+    const client = new P2PClient(identity, gameId, pubSubClient);
+    setP2pClient(client);
 
-    await p2pClient.connect();
+    client.connect();
   }
-
-  // const startGame = async () => {
-  //   p2pServer?.startGame();
-  // }
-  
-  // const nextRound = async () => {
-  //   p2pServer?.nextRound();
-  // }
-
-  // const state = () => {
-  //   return p2pClient?.state;
-  // }
-
-  // const transmittedServerState = () => {
-  //   return p2pClient?.serverState; 
-  // }
 
   const joinedOrHosting = () => {
     return p2pClient != null || p2pServer != null;
   }
-
-  // const isHost = () => {
-  //   return p2pServer != null
-  // }
-
-  // const gameCanBeStarted = () => {
-  //   return transmittedServerState() && !transmittedServerState().started
-  // }
-
-  // const vercelTestClient = () => {
-  //   return p2pClient?.vercelTest;
-  // }
 
   const updateFriendlyName = (name: string) => {
     setFriendlyName(name);
@@ -191,11 +128,15 @@ function App() {
         </a>
 
         {
-          !joinedOrHosting() && (
+          !joinedOrHosting() ? (
             <CreateGameForm
               updateFriendlyName={updateFriendlyName}
               updateGameId={updateGameId}
+              hostGame={hostGame}
+              joinGame={joinGame}
             />
+          ) : (
+            <InviteLink gameId={gameId} />
           )
         }
 
