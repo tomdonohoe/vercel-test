@@ -12,42 +12,11 @@ interface ApiRes {
   description: string;
 }
 
-interface PhotosResponse {
-  data: PexelsRes;
-  success: boolean;
-}
-
-interface PexelsResSrc {
-  original: string;
-  large2x: string;
-  large: string;
-  medium: string;
-  small: string;
-  portrait: string;
-  landscape: string;
-  tiny: string;
-}
-
-interface PexelsRes {
-    id: number;
-    width: number;
-    height: number;
-    url: string;
-    alt: string;
-    photographer: string;
-    photographer_url: string;
-    photographer_id: number;
-    avg_color: string;
-    src: PexelsResSrc;
-    liked: boolean;
-}
-
 function App() {
   // warmup api
   fetch('/api/status');
 
   const [data, setData] = useState<ApiRes | undefined>();
-  const [photo, setPhoto] = useState<PexelsRes | undefined>();
   const [alreadyUsedIds, setAlreadyUsedIds] = useState<PhotoDetails[] | undefined>(undefined);
   
   useEffect(() => {
@@ -74,32 +43,6 @@ function App() {
       setAlreadyUsedIds([photo]);
     }
   }
-  // const getPhoto = async () => {
-  //   try {
-  //     const res = await fetch(`/api/pexels/photos?photoId=${COUPLE_FIGHTING_ID}`);
-  //     if (res) {
-  //       const data: PhotosResponse = await res.json();
-  //       if (data.success) {
-  //         setPhoto(data.data);
-  //       }
-  //     };
-  //   } catch (err) {
-  //     const errorResponse = err as Response;
-  //     const error = await errorResponse.json();
-  //     console.log(error);
-  //   }
-  // }
-
-  // const photos = getPhotosByCategory(Categories.HAPPY);
-
-  // console.log(photos);
-
-  // const weddingPhotos = getPhotosByCategoryAndSubCategory(Categories.HAPPY, HappyCategories.WEDDING);
-  // console.log(weddingPhotos);
-
-  // const randomWeddingPhoto = getRandomPhoto(weddingPhotos);
-  // console.log(randomWeddingPhoto);
-
 
   return (
     <div className="App">

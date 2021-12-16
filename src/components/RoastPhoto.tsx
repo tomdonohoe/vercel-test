@@ -25,7 +25,7 @@ const RoastPhoto: FunctionComponent<RoastPhotoProps> = ({
 
     useEffect(() => {
         getPhoto();
-    }, [category]);
+    }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
     const getPhoto = async (): Promise<void> => {
         try {
