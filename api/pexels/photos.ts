@@ -24,10 +24,8 @@ export default async (request: VercelRequest, response: VercelResponse) => {
         };
         response.status(200).send(res);
     } catch (err) {
-        const error: Error = err;
         const res: ApiResponse = {
             success: false,
-            errorMessage: error.message,
         };
         response.status(500).send(res);
     }
