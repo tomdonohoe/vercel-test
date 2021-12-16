@@ -25,7 +25,7 @@ const RoastPhoto: FunctionComponent<RoastPhotoProps> = ({
 
     useEffect(() => {
         getPhoto();
-    }, []);
+    }, [category]);
 
     const getPhoto = async (): Promise<void> => {
         try {

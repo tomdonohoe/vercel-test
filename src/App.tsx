@@ -5,8 +5,7 @@ import './App.css';
 
 import RoastPhoto from './components/RoastPhoto';
 
-import { Categories, HappyCategories, FearCategories, PhotoDetails } from './types';
-import { getPhotosByCategory, getPhotosByCategoryAndSubCategory, getRandomPhoto } from './helpers/photos.helpers';
+import { Categories, PhotoDetails } from './types';
 
 interface ApiRes {
   name: string;
@@ -42,8 +41,6 @@ interface PexelsRes {
     src: PexelsResSrc;
     liked: boolean;
 }
-
-const COUPLE_FIGHTING_ID = 984949;
 
 function App() {
   // warmup api
