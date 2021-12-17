@@ -31,11 +31,11 @@ const CreateGameForm: FunctionComponent<CreateGameFormProps> = ({
         setFriendlyName(event.target.value)
     }
 
-    const handleCreateGame = () => {
+    const handleCreateGame = async () => {
         const gameId = getOrCreateGameId();
+        hostGame(gameId, friendlyName);
         updateFriendlyName(friendlyName);
         updateGameId(gameId);
-        hostGame(gameId, friendlyName);
     }
 
     const handleJoinGame = () => {

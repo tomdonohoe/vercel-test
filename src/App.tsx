@@ -1,10 +1,10 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 import CreateGameForm from './components/CreateGame/CreateGameForm';
 import InviteLink from './components/CreateGame/InviteLink';
+import ConnectedPlayers from './components/Players/ConnectedPlayers';
 import RoastPhoto from './components/RoastPhoto';
 
 import { Categories, PhotoDetails } from './types';
@@ -18,16 +18,6 @@ import {
   handleMessagefromAbly,
 } from './helpers/p2p/';
 
-interface ApiRes {
-  name: string;
-  description: string;
-}
-
-export enum ClientType {
-  HOST,
-  GUEST
-}
-
 function App() {
   // warmup api
   fetch('/api/status');
@@ -35,25 +25,27 @@ function App() {
   const [friendlyName, setFriendlyName] = useState<any>(null);
   const [p2pClient, setP2pClient] = useState<any>(null);
   const [p2pServer, setP2pServer] = useState<any>(null);
-  const [data, setData] = useState<ApiRes | undefined>();
-  const [alreadyUsedIds, setAlreadyUsedIds] = useState<PhotoDetails[] | undefined>(undefined);
-  
-  useEffect(() => {
-    getData();
-    // getPhoto();
-  }, []);
 
-  const getData = async () => {
-    try {
-      const res = await fetch('/api/test/index?name=tom');
-      if (res) {
-        const data = await res.json();
-        setData(data.data);
-      };
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  // useEffect(() => {
+  //   const connectServer = async () => {
+  //     await p2pServer.connect();
+  //   }
+
+  //   const connectClient = async () => {
+  //     await p2pClient.connect();
+  //   }
+
+  //   if (p2pServer !== null && p2pServer.uniqueId === undefined ) {
+  //     connectServer();
+  //   }
+
+  //   if (p2pClient !== null) {
+  //     connectClient();
+  //   }
+
+  // }, [p2pClient, p2pServer]);
+
+  const [alreadyUsedIds, setAlreadyUsedIds] = useState<PhotoDetails[] | undefined>(undefined);
 
   const updateAlreadyUsedIds = (photo: PhotoDetails) => {
     if (alreadyUsedIds) {
@@ -64,32 +56,41 @@ function App() {
   }
 
   const hostGame = async (gameId: string, friendlyName: string) => {
-    const pubSubClient = new PubSubClient((message: any, metadata: any) => {
-      handleMessagefromAbly(message, metadata, p2pClient, p2pServer);
-    });
-
+    const pubSubClient = new PubSubClient();
     const identity = new Identity(friendlyName);
 
     const server = new P2PServer(identity, gameId, pubSubClient);
     const client = new P2PClient(identity, gameId, pubSubClient);
 
+    pubSubClient.setOnMessageReceivedCallback((message: any, metadata: any) => {
+      handleMessagefromAbly(message, metadata, client, server);
+    });
+
     server.connect();
     client.connect();
 
+    console.log(server);
+    console.log(client);
+
     setP2pServer(server);
     setP2pClient(client);
+
+    // await server.connect();
+    // await client.connect();
   }
 
   const joinGame = async (gameId: string, friendlyName: string) => {
-    const pubSubClient = new PubSubClient((message: any, metadata: any) => {
-      handleMessagefromAbly(message, metadata, p2pClient, p2pServer);
-    });
-
+    const pubSubClient = new PubSubClient();
     const identity = new Identity(friendlyName);
     const client = new P2PClient(identity, gameId, pubSubClient);
+
     setP2pClient(client);
 
-    client.connect();
+    pubSubClient.setOnMessageReceivedCallback((message: any, metadata: any) => {
+      handleMessagefromAbly(message, metadata, client, p2pServer);
+    });
+
+    // await client.connect();
   }
 
   const joinedOrHosting = () => {
@@ -107,25 +108,6 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        { data && (
-          <>
-          <p>
-          Name: {data.name}
-          </p>
-          <p>
-          Description: {data.description}
-          </p>
-          </>
-        )}
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
 
         {
           !joinedOrHosting() ? (
@@ -136,7 +118,10 @@ function App() {
               joinGame={joinGame}
             />
           ) : (
-            <InviteLink gameId={gameId} />
+            <>
+            {/* <InviteLink gameId={gameId} /> */}
+            <ConnectedPlayers state={p2pClient.serverState}/>
+            </>
           )
         }
 

@@ -4,11 +4,10 @@ export class PubSubClient {
     private connected: boolean;
     private metadata!: any;
     private channel!: any;
-    private onMessageReceivedCallback: any;
+    private onMessageReceivedCallback!: any;
 
-    constructor(onMessageReceivedCallback: any) {
+    constructor() {
       this.connected = false;
-      this.onMessageReceivedCallback = onMessageReceivedCallback;
     }
   
     async connect(identity: any, uniqueId: any) {
@@ -17,7 +16,7 @@ export class PubSubClient {
       this.metadata = { uniqueId: uniqueId, ...identity };
   
       const ably = new Ably.Realtime.Promise({ authUrl: '/api/ably-token/token' });
-      this.channel = await ably.channels.get(`p2p-sample-${uniqueId}`, { params: { rewind: '1m' } });
+      this.channel = ably.channels.get(`p2p-sample-${uniqueId}`, { params: { rewind: '1m' } });
   
       await this.channel.subscribe((message: any) => {
         this.onMessageReceivedCallback(message.data, this.metadata);
@@ -34,5 +33,9 @@ export class PubSubClient {
       message.metadata = this.metadata;
       message.forClientId = targetClientId ? targetClientId : null;
       this.channel.publish({ name: "myMessageName", data: message });
+    }
+
+    setOnMessageReceivedCallback(onMessageReceivedCallback: any) {
+      this.onMessageReceivedCallback = onMessageReceivedCallback;
     }
 }

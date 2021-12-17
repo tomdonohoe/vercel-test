@@ -3,18 +3,20 @@ import { FunctionComponent } from "react";
 import Player from './Player';
 
 interface ConnectedPlayersProps {
-  gameState: any;
+  state: any;
 }
 
 const ConnectedPlayers: FunctionComponent<ConnectedPlayersProps> = ({
-  gameState,
+  state,
 }) => {
+  console.log('state: ')
+    console.log(state);
 
     return (
       <div>
-      <h3>Players: { gameState?.players?.length }</h3>
+      <h3>Players: { state?.players?.length }</h3>
       <ul>
-        { gameState?.players && gameState?.players.map(player => (
+        { state?.players && state?.players.map(player => (
           <Player
             key={player.clientId}
             player={player}
